@@ -1,5 +1,5 @@
 /*
- * Text slider v1.0
+ * Text slider v1.1
  * Example:
  * http://webfilin.ru/files/notes/textslider/
  *
@@ -16,30 +16,59 @@
 		oldY,
 		isIE = $.browser.msie;
 
-	var TextSlider = function (obj) {
-		this._prefs = {
-			min: null,
-			max: null,
-			step: null,
-			filterForValue: null,
-			filterForCSS: null
-		};
-
-		this._input = $(this);
+	var TextSlider = function (el, obj) {
+		this._input = $(el);
+		
+		if (!this._input.length) {
+			return;
+		}
+		
 		this._insideSpan = $('<span></span>');
 		this._outSideSpan = this._input.wrap('<span class="textslider"></span>');
 		 
-		this.value = this._input.val();
+		this._value = this._input.removeClass('textslider').val();
+        
+		this._insideSpan.insertBefore(this._input)
+			.attr('title', this._input.attr('title'));
 			
-		this._insideSpan.insertBefore(input)
-			.attr('title', input.attr('title'));
-			
-		this.initEvents();
-		this._input.val(this.value).change();
+		this._initPrefs();
+		this._initEvents();
+		
+        this.val(this._value);
+		this._input.change();
 	};
 	
 	TextSlider.prototype = {
-		css: {
+		constructor: TextSlider,
+		show: function () {
+			this._insideSpan.click();
+		},
+		hide: function () {
+			this._insideSpan.blur();
+		},
+		val: function (value) {
+            var p = this._prefs,
+                data = {
+                    span: this._insideSpan,
+                    min: p.min,
+                    max: p.max,
+                    step: p.step
+                };
+                
+			if (typeof value == 'undefined') {
+				return this._value;
+			} else {
+                this._insideSpan.html(p.filterForValue(value, data))
+                    .css(p.filterForCSS(value, data));
+
+				this._value = value;
+                this._input.val(value);
+                this._insideSpan.html(value);
+                
+                return this;
+			}
+		},		
+		_css: {
 			reset: {
 				position: '',
 				left: ''
@@ -51,14 +80,26 @@
 			unselectable: {
 				'user-select': 'none',
 				'-moz-user-select': 'none',
-				'-webkit-user-select': 'none'
+				'-webkit-user-select': 'none',
+				'-o-user-select': 'none'
 			}
 		},
-		unselectable: function (elem) {
-			elem.css(this.css.unselectable);
+		_prefs: {
+			min: null,
+			max: null,
+			step: null,
+			filterForValue: function (value, data) {
+                return value;
+            },
+			filterForCSS: function (value, data) {
+				return {};
+            }
+		},
+		_unselectable: function (elem) {
+			elem.css(this._css.unselectable);
 			isIE && elem.attr('unselectable', 'on');
 		},
-		initPrefs: function (prefs) {
+		_initPrefs: function (prefs) {
 			var p = this._prefs;
 			if (typeof prefs == 'object') {
 				if (typeof prefs.min != 'undefined') {
@@ -73,27 +114,15 @@
 					p.step = prefs.step;
 				}
 				
-				if (prefs.filterForValue) {
+				if (typeof prefs.filterForValue == 'function') {
 					p.filterForValue = prefs.filterForValue;
 				}
 	
-				if (prefs.filterForCSS) {
+				if (typeof prefs.filterForCSS == 'function') {
 					p.filterForCSS = prefs.filterForCSS;
 				}
 			}
-	
-			if (!p.filterForValue) {
-				p.filterForValue = function (value, data) {
-					return value;
-				}
-			}
-	
-			if (!p.filterForCSS) {
-				p.filterForCSS = function (value, data) {
-					return {};
-				}
-			}
-	
+		
 			if (p.min !== null && p.max !== null && p.max < p.min) {
 				p.min = p.max = null;
 			}
@@ -106,15 +135,15 @@
 				}
 			}
 	
-			if (p.min !== null && this.value < p.min) {
-				this.value = p.min;
+			if (p.min !== null && this._value < p.min) {
+				this._value = p.min;
 			}
 			
-			if (p.max !== null && this.value > p.max) {
-				this.value = p.max;
+			if (p.max !== null && this._value > p.max) {
+				this._value = p.max;
 			}
 		},
-		initEvents: function () {
+		_initEvents: function () {
 			var that = this;
 			this._insideSpan.click(function () {
 				if (isMouseMove && isIE) {
@@ -122,46 +151,29 @@
 				}
 		
 				that._insideSpan.hide();
-				that._input.css(that.css.reset).focus();
+				that._input.css(that._css.reset).focus();
 			}).mousedown(function (e) {
 				isMouseMove = false;
 				isMouseDown = true;
-				oldX = e.pageX;
+				
+                oldX = e.pageX;
 				oldY = e.pageY;
-				if (currentSpan && currentSpan != this) {
-					$('input', $(currentSpan).parent()).blur();
-				}
-				currentSpan = this;
-				oldValue = parseFloat($('input', $(currentSpan).parent()).val());
+                
+				that._input.blur();
+                
+				oldValue = parseFloat(that._input.val());
 	
-				$(document).bind('mousemove.textslider', mousemove)
-					.bind('mouseup.textslider', mouseup);
+				$(document).bind('mousemove.textslider', that._mousemove)
+					.bind('mouseup.textslider', that._mouseup);
 	
 				return false;
 			});
 	
-			input.change(function () {
-				var data = {
-					span: insideSpan,
-					min: min,
-					max: max,
-					step: step
-				};
-					
-				insideSpan.html(filterForValue(this.value, data))
-					.css(filterForCSS(this.value, data));
-			});
-	
-			input.focus(function () {
-				input.css(cssReset);
-				insideSpan.hide();
-			});
-	
-			function closeInput(e) {
+			this._close = function (e) {
 				if ((e.type == 'keydown' && e.keyCode == 13) || e.type == 'blur') {
 					var value = parseFloat(that._input.val()),
-						min = el.data('min'),
-						max = el.data('max');
+						min = that._prefs.min,
+						max = that._prefs.max;
 					
 					if (min !== null && value < min) {
 						value = min;
@@ -171,25 +183,19 @@
 					}
 	
 					that._insideSpan.show();
-					that._input.css(that.css.outside)
+					that._input.css(that._css.outside)
 						.val(value)
 						.change();
 				}
-			}
+			};
 	
-			this._input.css(this.css.outside)
-				.blur(closeInput)
-				.keydown(closeInput);
-	
-			function mousemove(e) {
+			this._mousemove = function (e) {
 				if (isMouseDown) {
 					isMouseMove = true;
-					var input = $('input', $(currentSpan).parent());
-					var value = oldValue + (e.pageX - oldX + oldY - e.pageY) * that._input.data('step');
-					value = Math.floor(value);
-					
-					var min = input.data('min'),
-						max = input.data('max');
+                    
+					var value = Math.floor(oldValue + (e.pageX - oldX + oldY - e.pageY) * that._prefs.step),
+                        min = that._prefs.min,
+                        max = that._prefs.max;
 						
 					if (min !== null && value < min) {
 						value = min;
@@ -202,17 +208,26 @@
 	
 					return false;
 				}
-			}
+			};
 	
-			function mouseup(e) {
+			this._mouseup = function (e) {
 				isMouseDown = false;
+                
 				$(document)
-					.unbind('mousemove.textslider', mousemove)
-					.unbind('mouseup.textslider', mouseup);
+					.unbind('mousemove.textslider', this._mousemove)
+					.unbind('mouseup.textslider', this._mouseup);
 	
 				return false;
-			}
-			
+			};
+
+			this._input.change(function () {
+                that.val(this.value);
+			}).focus(function () {
+				that._input.css(that._css.reset);
+				that._insideSpan.hide();
+			}).css(this._css.outside)
+				.blur(this._close)
+				.keydown(this._close);
 		}
 	};
 
@@ -227,4 +242,4 @@
 		
 		return this;
 	};
-})(jQuery); 
+})(jQuery);
