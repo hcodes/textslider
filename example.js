@@ -15,35 +15,37 @@ $(function() {
     });
     $('input.month', context).textSlider({min: 1, max: 12, filterForValue: function (value, data) {
         var months = [
-            {title: 'ίνβΰπό', color: 'blue'},
-            {title: 'Τεβπΰλό', color: 'blue'},
-            {title: 'Μΰπς', color: 'green'},
-            {title: 'ΐοπελό', color: 'green'},
-            {title: 'Μΰι', color: 'green'},
-            {title: 'Θώνό', color: '#E7D02F'},
-            {title: 'Θώλό', color: '#E7D02F'},
-            {title: 'ΐβγσρς', color: '#E7D02F'},
-            {title: 'Ρενςÿαπό', color: '#FF6000'},
-            {title: 'Ξκςÿαπό', color: '#FF6000'},
-            {title: 'Νξÿαπό', color: '#FF6000'},
-            {title: 'Δεκΰαπό', color: 'blue'}
+            {title: 'Π―Π½Π²Π°Ρ€Ρ', color: 'blue'},
+            {title: 'Π¤ΠµΠ²Ρ€Π°Π»Ρ', color: 'blue'},
+            {title: 'ΠΠ°Ρ€Ρ‚', color: 'green'},
+            {title: 'ΠΠΏΡ€ΠµΠ»Ρ', color: 'green'},
+            {title: 'ΠΠ°ΠΉ', color: 'green'},
+            {title: 'ΠΡΠ½Ρ', color: '#E7D02F'},
+            {title: 'ΠΡΠ»Ρ', color: '#E7D02F'},
+            {title: 'ΠΠ²Π³ΡƒΡΡ‚', color: '#E7D02F'},
+            {title: 'Π΅ΠµΠ½Ρ‚ΡΠ±Ρ€Ρ', color: '#FF6000'},
+            {title: 'ΠΠΊΡ‚ΡΠ±Ρ€Ρ', color: '#FF6000'},
+            {title: 'ΠΠΎΡΠ±Ρ€Ρ', color: '#FF6000'},
+            {title: 'Π”ΠµΠΊΠ°Π±Ρ€Ρ', color: 'blue'}
         ];
         
         var t = months[parseInt(value) - 1];
         data.span.css('color', t.color);
+        
         return t.title;
     }}); 
 
     $('input.fs', context).textSlider({min: 10, max: 90,
-        filterForCSS: function(value, data) {
+        filterForCSS: function (value, data) {
             var obj = {};
             obj.fontSize = value + 'px';
+            
             return obj;
         }        
     });
     
     $('input.width, input.height', context).textSlider({min: 10, max: 90,
-         filterForCSS: function(value, data) {
+         filterForCSS: function (value, data) {
             var obj = {};
             var minValue = data.min,
                 maxValue = data.max,
@@ -51,12 +53,13 @@ $(function() {
                 maxSize = 40;
             
             obj.fontSize = ((value - minValue) / (maxValue - minValue) * (maxSize - minSize) + minSize) + 'px';
+            
             return obj;
         }
     });    
 
    $('input.zp', context).textSlider({min: 0, max: 100,
-         filterForValue: function(value, data) {
+         filterForValue: function (value, data) {
             var text = '';
             for (var i = 0; i < parseInt(value); i++) {
                 text += '0';
@@ -67,7 +70,7 @@ $(function() {
     });
     
    $('input.angle', context).textSlider({min: 0, max: 360,
-         filterForValue: function(value, data) {
+         filterForValue: function (value, data) {
             var text = value + '<span style="position:relative; -webkit-transform: rotate(' + value + 'deg); -moz-transform: rotate(' + value + 'deg);">&rarr;</span>';
             
             return text;
@@ -89,5 +92,4 @@ $(function() {
             return obj;
         }
     });
-    
 });
