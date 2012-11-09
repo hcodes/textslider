@@ -9,213 +9,220 @@
  */
 
 (function ($) {
-	var mousedown = false, isMouseMove = false, currentSpan, oldValue, oldX, oldY, cssReset = {
-		position : '',
-		left : ''
-	}, cssOutside = {
-		position : 'absolute',
-		left : '-10000px'
-	};
+	var isMouseDown = false,
+		isMouseMove = false,
+		oldValue,
+		oldX,
+		oldY,
+		isIE = $.browser.msie;
 
-	function install(obj) {
-		var min = null,
-			max = null,
-			step = null,
-			filterForValue = null,
-			filterForCSS = null,
-			input = $(this),
-			insideSpan = $('<span style="user-select:none;-moz-user-select:none;-webkit-user-select:none;"></span>'),
-			outSideSpan = input.wrap('<span class="textslider"></span>'), 
-			value = input.val();
+	var TextSlider = function (obj) {
+		this._prefs = {
+			min: null,
+			max: null,
+			step: null,
+			filterForValue: null,
+			filterForCSS: null
+		};
+
+		this._input = $(this);
+		this._insideSpan = $('<span></span>');
+		this._outSideSpan = this._input.wrap('<span class="textslider"></span>');
+		 
+		this.value = this._input.val();
 			
-		insideSpan.attr('unselectable', 'on')
-			.insertBefore(input)
+		this._insideSpan.insertBefore(input)
 			.attr('title', input.attr('title'));
-
-		if (typeof obj == 'object') {
-			if ( typeof obj.min != 'undefined') {
-				min = obj.min;
-			}
 			
-			if (typeof obj.max != 'undefined') {
-				max = obj.max;
+		this.initEvents();
+		this._input.val(this.value).change();
+	};
+	
+	TextSlider.prototype = {
+		css: {
+			reset: {
+				position: '',
+				left: ''
+			},
+			outside: {
+				position: 'absolute',
+				left: '-10000px'
+			},
+			unselectable: {
+				'user-select': 'none',
+				'-moz-user-select': 'none',
+				'-webkit-user-select': 'none'
 			}
-			
-			if (typeof obj.step != 'undefined') {
-				step = obj.step;
-			}
-			
-			if (obj.filterForValue) {
-				filterForValue = obj.filterForValue;
-			}
-
-			if (obj.filterForCSS) {
-				filterForCSS = obj.filterForCSS;
-			}
-		} else {
-			var classes = this.className.split(' ');
-			for (var i = 0; i < classes.length; i++) {
-				if (classes[i].search(/min=/) != -1) {
-					min = classes[i].replace(/min=/, '');
-					min = parseFloat(min);
+		},
+		unselectable: function (elem) {
+			elem.css(this.css.unselectable);
+			isIE && elem.attr('unselectable', 'on');
+		},
+		initPrefs: function (prefs) {
+			var p = this._prefs;
+			if (typeof prefs == 'object') {
+				if (typeof prefs.min != 'undefined') {
+					p.min = prefs.min;
 				}
 				
-				if (classes[i].search(/max=/) != -1) {
-					max = classes[i].replace(/max=/, '');
-					max = parseFloat(max);
+				if (typeof prefs.max != 'undefined') {
+					p.max = prefs.max;
 				}
 				
-				if (classes[i].search(/step=/) != -1) {
-					step = classes[i].replace(/step=/, '');
-					step = parseFloat(step);
+				if (typeof prefs.step != 'undefined') {
+					p.step = prefs.step;
 				}
-			}
-		}
-
-		if (!filterForValue) {
-			filterForValue = function (value, data) {
-				return value;
-			}
-		}
-
-		if (!filterForCSS) {
-			filterForCSS = function (value, data) {
-				return {};
-			}
-		}
-
-		if (min !== null && max !== null && max < min) {
-			min = max = null;
-		}
-
-		if (step === null) {
-			if (min !== null && max !== null) {
-				step = (max - min) / 100;
-			} else {
-				step = 1;
-			}
-		}
-
-		if (min !== null && value < min) {
-			value = min;
-		}
-		
-		if (max !== null && value > max) {
-			value = max;
-		}
-
-		input.data('min', min)
-			.data('max', max)
-			.data('step', step);
-			
-		insideSpan.click(function () {
-			if (isMouseMove && $.browser.msie) {
-				return;
+				
+				if (prefs.filterForValue) {
+					p.filterForValue = prefs.filterForValue;
+				}
+	
+				if (prefs.filterForCSS) {
+					p.filterForCSS = prefs.filterForCSS;
+				}
 			}
 	
-			insideSpan.hide();
-			input.css(cssReset).focus();
-		}).mousedown(function (e) {
-			isMouseMove = false;
-			mousedown = true;
-			oldX = e.pageX;
-			oldY = e.pageY;
-			if (currentSpan && currentSpan != this) {
-				$('input', $(currentSpan).parent()).blur();
+			if (!p.filterForValue) {
+				p.filterForValue = function (value, data) {
+					return value;
+				}
 			}
-			currentSpan = this;
-			oldValue = parseFloat($('input', $(currentSpan).parent()).val());
-
-			$(document).bind('mousemove.textslider', mousemove)
-				.bind('mouseup.textslider', mouseup);
-
-			return false;
-		});
-
-		input.change(function () {
-			var data = {
-				span: insideSpan,
-				min: min,
-				max: max,
-				step: step
-			};
-				
-			insideSpan.html(filterForValue(this.value, data))
-				.css(filterForCSS(this.value, data));
-		});
-
-		input.val(value).change();
-		input.focus(function () {
-			input.css(cssReset);
-			insideSpan.hide();
-		});
-
-		function closeInput(e) {
-			if ((e.type == 'keydown' && e.keyCode == 13) || e.type == 'blur') {
-				var value = parseFloat(input.val()),
-					min = el.data('min'),
-					max = el.data('max');
-					
-				
-				if (min !== null && value < min) {
-					value = min;
+	
+			if (!p.filterForCSS) {
+				p.filterForCSS = function (value, data) {
+					return {};
 				}
-				if (max !== null && value > max) {
-					value = max;
-				}
-
-				insideSpan.show();
-				input.css(cssOutside)
-					.val(value)
-					.change();
 			}
-		}
-
-		input.css(cssOutside)
-			.blur(closeInput)
-			.keydown(closeInput);
-
-		function mousemove(e) {
-			if (mousedown) {
-				isMouseMove = true;
-				var input = $('input', $(currentSpan).parent());
-				var value = oldValue + (e.pageX - oldX + oldY - e.pageY) * input.data('step');
-				value = Math.floor(value);
-				
-				var min = input.data('min'),
-					max = input.data('max');
+	
+			if (p.min !== null && p.max !== null && p.max < p.min) {
+				p.min = p.max = null;
+			}
+	
+			if (p.step === null) {
+				if (p.min !== null && p.max !== null) {
+					p.step = (p.max - p.min) / 100;
+				} else {
+					p.step = 1;
+				}
+			}
+	
+			if (p.min !== null && this.value < p.min) {
+				this.value = p.min;
+			}
+			
+			if (p.max !== null && this.value > p.max) {
+				this.value = p.max;
+			}
+		},
+		initEvents: function () {
+			var that = this;
+			this._insideSpan.click(function () {
+				if (isMouseMove && isIE) {
+					return;
+				}
+		
+				that._insideSpan.hide();
+				that._input.css(that.css.reset).focus();
+			}).mousedown(function (e) {
+				isMouseMove = false;
+				isMouseDown = true;
+				oldX = e.pageX;
+				oldY = e.pageY;
+				if (currentSpan && currentSpan != this) {
+					$('input', $(currentSpan).parent()).blur();
+				}
+				currentSpan = this;
+				oldValue = parseFloat($('input', $(currentSpan).parent()).val());
+	
+				$(document).bind('mousemove.textslider', mousemove)
+					.bind('mouseup.textslider', mouseup);
+	
+				return false;
+			});
+	
+			input.change(function () {
+				var data = {
+					span: insideSpan,
+					min: min,
+					max: max,
+					step: step
+				};
 					
-				if (min !== null && value < min) {
-					value = min;
+				insideSpan.html(filterForValue(this.value, data))
+					.css(filterForCSS(this.value, data));
+			});
+	
+			input.focus(function () {
+				input.css(cssReset);
+				insideSpan.hide();
+			});
+	
+			function closeInput(e) {
+				if ((e.type == 'keydown' && e.keyCode == 13) || e.type == 'blur') {
+					var value = parseFloat(that._input.val()),
+						min = el.data('min'),
+						max = el.data('max');
+					
+					if (min !== null && value < min) {
+						value = min;
+					}
+					if (max !== null && value > max) {
+						value = max;
+					}
+	
+					that._insideSpan.show();
+					that._input.css(that.css.outside)
+						.val(value)
+						.change();
 				}
-				if (max !== null && value > max) {
-					value = max;
+			}
+	
+			this._input.css(this.css.outside)
+				.blur(closeInput)
+				.keydown(closeInput);
+	
+			function mousemove(e) {
+				if (isMouseDown) {
+					isMouseMove = true;
+					var input = $('input', $(currentSpan).parent());
+					var value = oldValue + (e.pageX - oldX + oldY - e.pageY) * that._input.data('step');
+					value = Math.floor(value);
+					
+					var min = input.data('min'),
+						max = input.data('max');
+						
+					if (min !== null && value < min) {
+						value = min;
+					}
+					if (max !== null && value > max) {
+						value = max;
+					}
+	
+					that._input.val(value).change();
+	
+					return false;
 				}
-
-				input.val(value).change();
-
+			}
+	
+			function mouseup(e) {
+				isMouseDown = false;
+				$(document)
+					.unbind('mousemove.textslider', mousemove)
+					.unbind('mouseup.textslider', mouseup);
+	
 				return false;
 			}
+			
 		}
+	};
 
-		function mouseup(e) {
-			mousedown = false;
-			$(document)
-				.unbind('mousemove.textslider', mousemove)
-				.unbind('mouseup.textslider', mouseup);
-
-			return false;
-		}
-
-	}
-
-	$.fn.textSlider = function (obj) {
+	$.fn.textSlider = function (prefs) {
 		if (!this.length) {
 			return;
 		}
 
-		this.each(function (i) {
-			install.call(this, i, obj);
+		this.each(function () {
+			new TextSlider(this, prefs);
 		});
 		
 		return this;

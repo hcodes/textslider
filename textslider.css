@@ -1,0 +1,11 @@
+span.textslider span {
+    color: blue;
+    border-bottom: 1px dotted blue;
+    line-height: 1.5em;
+    cursor: e-resize;
+}
+
+span.textslider span span {
+    line-height: auto;
+    border-bottom: none;
+}
