@@ -19,7 +19,7 @@
         $(document).ready(function() {
             $('input.textslider').textSlider({min: 0, max: 50});
         });
-    </script
+    </script>
 </body>
 </html>
   ```
