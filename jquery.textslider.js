@@ -150,11 +150,15 @@ TextSlider.prototype = {
     _delEvents: function () {
         $(document)
             .off('mousemove.textslider', this._mousemove)
-            .off('mouseup.textslider', this._mouseup);    
+            .off('mouseup.textslider', this._mouseup);
     },
     _initEvents: function () {
         var that = this;
-        this._insideSpan.click(function () {
+        this._insideSpan.click(function (e) {
+            if (e.which !== 1) {
+                return;
+            }
+            
             if (isMouseMove && isIE) {
                 return;
             }
@@ -162,6 +166,10 @@ TextSlider.prototype = {
             hideText(that._outsideSpan);
             that._input.focus();
         }).mousedown(function (e) {
+            if (e.which !== 1) {
+                return;
+            }
+            
             isMouseMove = false;
             isMouseDown = true;
             
@@ -203,7 +211,7 @@ TextSlider.prototype = {
         };
 
         this._mousemove = function (e) {
-            if (isMouseDown) {
+            if (e.which === 1 && isMouseDown) {
                 isMouseMove = true;
                 
                 var value = Math.floor(oldValue + (e.pageX - oldX + oldY - e.pageY) * that._prefs.step),
@@ -226,6 +234,10 @@ TextSlider.prototype = {
         };
 
         this._mouseup = function (e) {
+            if (e.which !== 1) {
+                return;
+            }
+        
             isMouseDown = false;
             
             that._outsideSpan.removeClass('textslider_change_yes');
