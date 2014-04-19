@@ -1,11 +1,26 @@
-span.textslider span {
+.textslider__text {
     color: blue;
     border-bottom: 1px dotted blue;
     line-height: 1.5em;
     cursor: e-resize;
 }
 
-span.textslider span span {
-    line-height: auto;
-    border-bottom: none;
+.textslider_show-text_yes input
+{
+    position: absolute;
+    left: -10000px;
+}
+
+.textslider_show-text_no .textslider__text
+{
+    display: none;
+}
+
+.textslider_change_yes .textslider__text
+{
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
 }

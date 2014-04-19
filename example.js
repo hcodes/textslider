@@ -17,6 +17,12 @@ $('input.len', context).textSlider({min: 50, max: 400, filterForValue: function 
     }
 });
 
+$('input.angle', context).textSlider({min: 0, max: 360,
+     filterForValue: function (value, data) {
+        return value + '<span style="position:relative; display: inline-block; transform: rotate(' + value + 'deg);">&rarr;</span>';
+    }
+});
+
 $('input.month', context).textSlider({min: 1, max: 12, filterForValue: function (value, data) {
     var months = [
         {title: 'Январь', color: 'blue'},
@@ -62,23 +68,6 @@ $('input.width, input.height', context).textSlider({min: 10, max: 90,
     }
 });    
 
-$('input.zp', context).textSlider({min: 0, max: 100,
-     filterForValue: function (value, data) {
-        var text = '';
-        for (var i = 0; i < parseInt(value, 10); i++) {
-            text += '0';
-        }
-        
-        return '$1' + text;
-    }
-});
-
-$('input.angle', context).textSlider({min: 0, max: 360,
-     filterForValue: function (value, data) {
-        return value + '<span style="position:relative; -webkit-transform: rotate(' + value + 'deg); -moz-transform: rotate(' + value + 'deg);">&rarr;</span>';
-    }
-}); 
-
 $('input.temp', context).textSlider({min: 0, max: 100,
      filterForCSS: function(value, data) {
         function inter(value, x1, x2, y1, y2) {
@@ -92,6 +81,17 @@ $('input.temp', context).textSlider({min: 0, max: 100,
         obj.color = 'rgb(' + red + ',' + '0,' + blue + ')';             
         
         return obj;
+    }
+});
+
+$('input.zp', context).textSlider({min: 0, max: 100,
+     filterForValue: function (value, data) {
+        var text = '';
+        for (var i = 0; i < parseInt(value, 10); i++) {
+            text += '0';
+        }
+        
+        return '$1' + text;
     }
 });
 
