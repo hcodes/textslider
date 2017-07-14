@@ -9,13 +9,13 @@
   ```HTML
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="./textslider.css"  />
-    <script type="text/javascript" src="./jquery.js"></script>
-    <script type="text/javascript" src="./jquery.textslider.js"></script>
+    <link rel="stylesheet" href="./textslider.css"  />
+    <script src="./jquery.js"></script>
+    <script src="./jquery.textslider.js"></script>
 </head>
 <body>
     <input type="text" class="textslider" value="25" />
-    <script type="text/javascript">
+    <script>
         $(document).ready(function() {
             $('input.textslider').textSlider({min: 0, max: 50});
         });
@@ -25,15 +25,11 @@
   ```
 
 ## Примеры использования
-  ```JavaScript
+```js
 $('input.textslider').textSlider({min: 0, max: 50});
-  ```
+```
   
-  ```JavaScript
-$('input.textslider').textSlider({min: -500, max: 500});
-  ```
-  
-  ```JavaScript
+```js
 $('input.textslider').textSlider({
     min: 8,
     max: 30,
@@ -41,9 +37,9 @@ $('input.textslider').textSlider({
         return {fontSize: value + 'px'};
     }
 });
-  ```
+```
 
-  ```JavaScript
+```js
 $('input.textslider').textSlider({
     min: -50,
     max: 50,
@@ -51,4 +47,4 @@ $('input.textslider').textSlider({
         return value > 0 ? '+' + value : value;
     }
 });
-  ```
+```
