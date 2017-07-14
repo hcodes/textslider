@@ -24,7 +24,7 @@
 </html>
   ```
 
-## Примеры использования
+## [Примеры](https://hcodes.github.io/textslider/examples/example.html)
 ```js
 $('input.textslider').textSlider({min: 0, max: 50});
 ```
